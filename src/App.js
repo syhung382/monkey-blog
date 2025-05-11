@@ -15,6 +15,8 @@ import UserAddNew from "./modules/user/UserAddNew";
 import UserProfile from "./modules/user/UserProfile";
 import CategoryManage from "./modules/category/CategoryManage";
 import CategoryUpdate from "./modules/category/CategoryUpdate";
+import UserUpdate from "./modules/user/UserUpdate";
+import PostUpdate from "./modules/post/PostUpdate";
 // import Header from "./components/layout/Header";
 
 function App() {
@@ -38,12 +40,16 @@ function App() {
               element={<DashboardPage></DashboardPage>}
             ></Route>
             <Route
-              path="/manage/posts"
+              path="/manage/post"
               element={<PostManage></PostManage>}
             ></Route>
             <Route
               path="/manage/add-post"
               element={<PostAddNew></PostAddNew>}
+            ></Route>
+            <Route
+              path="/manage/update-post"
+              element={<PostUpdate></PostUpdate>}
             ></Route>
             <Route
               path="/manage/category"
@@ -64,6 +70,10 @@ function App() {
             <Route
               path="/manage/add-user"
               element={<UserAddNew></UserAddNew>}
+            ></Route>
+            <Route
+              path="/manage/update-user"
+              element={<UserUpdate></UserUpdate>}
             ></Route>
             <Route
               path="/profile"

@@ -30,6 +30,8 @@ const CategoryManage = () => {
   const [lastDoc, setLastDoc] = useState();
   const [total, setTotal] = useState(0);
 
+  let qLimit = qLimit;
+
   useEffect(() => {
     async function fetchData() {
       const colRef = collection(db, "categories");
@@ -40,7 +42,7 @@ const CategoryManage = () => {
             where("name", ">=", filter),
             where("name", "<=", filter + "utf8")
           )
-        : query(colRef, limit(queryLimit.NORMAL));
+        : query(colRef, limit(qLimit));
 
       const documentSnapshots = await getDocs(newRef);
 
@@ -72,7 +74,7 @@ const CategoryManage = () => {
     const nextRef = query(
       collection(db, "categories"),
       startAfter(lastDoc),
-      limit(queryLimit.NORMAL)
+      limit(qLimit)
     );
 
     onSnapshot(nextRef, (snapshot) => {
@@ -186,7 +188,7 @@ const CategoryManage = () => {
             ))}
         </tbody>
       </Table>
-      {total > Number(queryLimit.NORMAL) && total > listCategory?.length && (
+      {total > Number(qLimit) && total > listCategory?.length && (
         <div className="mt-10">
           <Button onClick={handleLoadMore} className="mx-auto">
             Load more

@@ -1,12 +1,16 @@
-import { collection, onSnapshot } from "firebase/firestore";
-import { ActionDelete, ActionEdit, ActionView } from "../../components/action";
+import { collection, deleteDoc, doc, onSnapshot } from "firebase/firestore";
+import { ActionDelete, ActionEdit } from "../../components/action";
 import LabelStatus from "../../components/label/LabelStatus";
 import Table from "../../components/table/Table";
 import DashboardHeading from "../dashboard/DashboardHeading";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { db } from "../../firebase-app/firebase-config";
-import { categoryStatus } from "../../utils/constants";
+import { userRole, userStatus } from "../../utils/constants";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import Swal from "sweetalert2";
+import { deleteUser } from "firebase/auth";
+import Button from "../../components/button/Button";
 
 const UserManage = () => {
   const [userList, setUserList] = useState([]);
@@ -26,12 +30,67 @@ const UserManage = () => {
     });
   }, []);
 
+  const renderLabelStatus = (status) => {
+    switch (status) {
+      case userStatus.ACTIVE:
+        return <LabelStatus type="success">Active</LabelStatus>;
+      case userStatus.PENDING:
+        return <LabelStatus type="warning">Pending</LabelStatus>;
+      case userStatus.BAN:
+        return <LabelStatus type="danger">Ban</LabelStatus>;
+      default:
+    }
+  };
+
+  const renderLabelRole = (roles) => {
+    switch (roles) {
+      case userRole.ADMIN:
+        return "Admin";
+      case userRole.MOD:
+        return "Moderator";
+      case userRole.USER:
+        return "User";
+      default:
+        return "--";
+    }
+  };
+
+  const handleDeleteUser = async (user) => {
+    const colRef = doc(db, "users", user.id);
+
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, delete it!",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        await deleteUser(user);
+        await deleteDoc(colRef);
+        toast.success(`Delete user ${user.email} successfully!`);
+        Swal.fire({
+          title: "Deleted!",
+          text: "Your file has been deleted.",
+          icon: "success",
+        });
+      }
+    });
+  };
+
   return (
     <div>
       <DashboardHeading
         title="Users"
         desc="Manage your user"
       ></DashboardHeading>
+      <div className="flex justify-end mb-10">
+        <Button kind="ghost" to="/manage/add-user">
+          Add new user
+        </Button>
+      </div>
       <Table>
         <thead>
           <tr>
@@ -59,27 +118,19 @@ const UserManage = () => {
                     <div className="flex-1">
                       <h3>{user.fullname}</h3>
                       <time className="text-sm text-gray-400" datetime="">
-                        {new Date().toDateString()}
+                        {new Date(
+                          user?.createdAt?.seconds * 1000
+                        ).toLocaleDateString("vi-VI")}
                       </time>
                     </div>
                   </div>
                 </td>
                 <td>{user?.username}</td>
                 <td>{user?.email}</td>
-                <td>
-                  <LabelStatus
-                    type={
-                      Number(user.status) === categoryStatus.APPROVED
-                        ? "success"
-                        : "warning"
-                    }
-                  >
-                    {Number(user.status) === categoryStatus.APPROVED
-                      ? "Approved"
-                      : "Unapproved"}
-                  </LabelStatus>
+                <td>{renderLabelStatus(Number(user.status))}</td>
+                <td className="mx-auto text-center">
+                  {renderLabelRole(Number(user.role))}
                 </td>
-                <td></td>
                 <td>
                   <div className="flex item-center gap-x-3">
                     {/* <ActionView></ActionView> */}
@@ -89,7 +140,7 @@ const UserManage = () => {
                       }
                     ></ActionEdit>
                     <ActionDelete
-                    // onClick={() => handleDeleteUser(user.id)}
+                      onClick={() => handleDeleteUser(user)}
                     ></ActionDelete>
                   </div>
                 </td>

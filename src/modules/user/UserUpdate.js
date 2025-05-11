@@ -1,25 +1,21 @@
-import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import React, { useEffect, useState } from "react";
 import { Button } from "../../components/button";
 import { Radio } from "../../components/checkbox";
 import { Field, FieldCheckboxes } from "../../components/field";
 import { Input } from "../../components/input";
 import { Label } from "../../components/label";
+import { useForm } from "react-hook-form";
 import { userRole, userStatus } from "../../utils/constants";
 import DashboardHeading from "../dashboard/DashboardHeading";
-import React from "react";
-import { useForm } from "react-hook-form";
-import { auth, db } from "../../firebase-app/firebase-config";
-import {
-  addDoc,
-  collection,
-  doc,
-  serverTimestamp,
-  setDoc,
-} from "firebase/firestore";
-import slugify from "slugify";
+import { useSearchParams } from "react-router-dom";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { db } from "../../firebase-app/firebase-config";
 import { toast } from "react-toastify";
 
-const UserAddNew = () => {
+const UserUpdate = () => {
+  const [params] = useSearchParams();
+  const userId = params.get("id");
+
   const {
     control,
     handleSubmit,
@@ -41,53 +37,49 @@ const UserAddNew = () => {
     },
   });
 
-  const handleCreateUser = async (values) => {
+  const watchStatus = watch("status");
+  const watchRole = watch("role");
+
+  const handleUpdateUser = async (values) => {
+    const colRef = doc(db, "users", userId);
     if (!isValid) return;
 
     try {
-      await createUserWithEmailAndPassword(auth, values.email, values.password);
-
-      await updateProfile(auth.currentUser, {
-        displayName: values.fullname,
+      await updateDoc(colRef, {
+        ...values,
       });
-      await setDoc(doc(db, "users", auth.currentUser.uid), {
-        fullname: values.fullname,
-        email: values.email,
-        password: values.password,
-        username: slugify(values.username, { lower: true }),
-        status: Number(values.status),
-        role: Number(values.role),
-        createdAt: serverTimestamp(),
-      });
-
-      toast.success(
-        `Create new user with email: ${values.email} successfully!`
-      );
+      toast.success("Update user successfully!");
     } catch (e) {
       toast.error(e.message);
-    } finally {
-      reset({
-        fullname: "",
-        email: "",
-        password: "",
-        username: "",
-        status: userStatus.ACTIVE,
-        role: userRole.USER,
-        createdAt: new Date(),
-      });
     }
   };
 
-  const watchStatus = watch("status");
-  const watchRole = watch("role");
+  useEffect(() => {
+    async function fetchData() {
+      const colRef = doc(db, "users", userId);
+      const docData = await getDoc(colRef);
+      reset({
+        fullname: docData.data().fullname,
+        email: docData.data().email,
+        password: docData.data().password,
+        username: docData.data().username,
+        status: Number(docData.data().status),
+        role: Number(docData.data().role),
+        createdAt: docData.data().createdAt,
+      });
+    }
+    fetchData();
+  }, [userId, reset]);
+
+  if (!userId) return null;
 
   return (
     <div>
       <DashboardHeading
-        title="New user"
-        desc="Add new user to system"
+        title="Update user"
+        desc="Update user to system"
       ></DashboardHeading>
-      <form onSubmit={handleSubmit(handleCreateUser)}>
+      <form onSubmit={handleSubmit(handleUpdateUser)}>
         <div className="form-layout">
           <Field>
             <Label>Fullname</Label>
@@ -193,11 +185,11 @@ const UserAddNew = () => {
           isLoading={isSubmitting}
           disabled={isSubmitting}
         >
-          Add new user
+          Update user
         </Button>
       </form>
     </div>
   );
 };
 
-export default UserAddNew;
+export default UserUpdate;
