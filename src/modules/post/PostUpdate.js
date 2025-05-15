@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import DashboardHeading from "../dashboard/DashboardHeading";
 import { postStatus } from "../../utils/constants";
 import { useForm } from "react-hook-form";
@@ -10,10 +10,28 @@ import { Dropdown } from "../../components/dropdown";
 import Toggle from "../../components/toggle/Toggle";
 import { Radio } from "../../components/checkbox";
 import { Button } from "../../components/button";
+import { useSearchParams } from "react-router-dom";
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  updateDoc,
+  where,
+} from "firebase/firestore";
+import { db } from "../../firebase-app/firebase-config";
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
+import { toast } from "react-toastify";
 
 const PostUpdate = () => {
   const [categories, setCategories] = useState([]);
   const [selectedCategorie, setSelectedCategorie] = useState([]);
+  const [content, setContent] = useState("");
+
+  const [params] = useSearchParams();
+  const postId = params.get("id");
 
   const {
     control,
@@ -38,12 +56,90 @@ const PostUpdate = () => {
   const watchStatus = watch("status");
   const watchHot = watch("hot");
 
-  const updatePostHandle = (values) => {};
+  const updatePostHandle = async (values) => {
+    if (!isValid) return;
+
+    try {
+      const docRef = doc(db, "posts", postId);
+      await updateDoc(docRef, {
+        ...values,
+        content,
+      });
+      toast.success("Update post successfully!");
+    } catch (e) {
+      toast.error("Update post failed!");
+      console.log(e.message);
+    }
+  };
 
   const handleSelectOption = (item) => {
     setValue("categoryId", item.id);
     setSelectedCategorie(item);
   };
+
+  const modul = useMemo(
+    () => ({
+      toolbar: [
+        ["bold", "italic", "underline", "strike"],
+        ["blockquote"],
+        [{ header: 1 }, { header: 2 }],
+        [{ list: "ordered" }, { list: "bullet" }],
+        [{ header: [1, 2, 3, 4, 5, 6, false] }],
+        ["link", "image"],
+      ],
+    }),
+    []
+  );
+
+  useEffect(() => {
+    async function fetchData() {
+      if (!postId) return;
+
+      const docRef = doc(db, "posts", postId);
+      const docSnapshot = await getDoc(docRef);
+
+      if (docSnapshot.data()) {
+        reset({
+          title: docSnapshot.data().title,
+          slug: docSnapshot.data().slug,
+          status: Number(docSnapshot.data().status),
+          categoryId: docSnapshot.data().categoryId,
+          hot: docSnapshot.data().hot,
+          image: "",
+        });
+
+        setContent(docSnapshot.data()?.content || "");
+
+        const catRef = doc(db, "categories", docSnapshot.data().categoryId);
+        const catSnapshot = await getDoc(catRef);
+
+        if (catSnapshot.data()) {
+          setSelectedCategorie(catSnapshot.data());
+          // console.log(catSnapshot.data());
+        }
+      }
+    }
+
+    async function getCategories() {
+      const colRef = collection(db, "categories");
+      const q = query(colRef, where("status", "==", 1));
+      const querySnapshot = await getDocs(q);
+      let result = [];
+      querySnapshot.forEach((doc) => {
+        result.push({
+          id: doc.id,
+          ...doc.data(),
+        });
+      });
+
+      setCategories(result);
+    }
+
+    getCategories();
+    fetchData();
+  }, [postId, reset]);
+
+  if (!postId) return null;
 
   return (
     <>
@@ -99,6 +195,19 @@ const PostUpdate = () => {
           </Field>
           <Field></Field>
         </div>
+        <div className="mb-10">
+          <Field>
+            <Label>Content</Label>
+            <div className="w-full entry-content">
+              <ReactQuill
+                modules={modul}
+                theme="snow"
+                value={content}
+                onChange={setContent}
+              />
+            </div>
+          </Field>
+        </div>
         <div className="grid grid-cols-2 mb-10 gap-x-10">
           <Field>
             <Label>Feature post</Label>
@@ -146,7 +255,7 @@ const PostUpdate = () => {
             isLoading={isSubmitting}
             disabled={isSubmitting}
           >
-            Add new post
+            Update post
           </Button>
         </div>
       </form>

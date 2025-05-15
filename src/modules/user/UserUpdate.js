@@ -11,6 +11,7 @@ import { useSearchParams } from "react-router-dom";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../../firebase-app/firebase-config";
 import { toast } from "react-toastify";
+import { Textarea } from "../../components/textarea";
 
 const UserUpdate = () => {
   const [params] = useSearchParams();
@@ -34,6 +35,7 @@ const UserUpdate = () => {
       status: userStatus.ACTIVE,
       role: userRole.USER,
       createdAt: new Date(),
+      description: "",
     },
   });
 
@@ -66,6 +68,7 @@ const UserUpdate = () => {
         status: Number(docData.data().status),
         role: Number(docData.data().role),
         createdAt: docData.data().createdAt,
+        description: docData.data().description,
       });
     }
     fetchData();
@@ -176,6 +179,12 @@ const UserUpdate = () => {
                 User
               </Radio>
             </FieldCheckboxes>
+          </Field>
+        </div>
+        <div className="form-layout">
+          <Field>
+            <Label>Description</Label>
+            <Textarea name="description" control={control}></Textarea>
           </Field>
         </div>
         <Button
