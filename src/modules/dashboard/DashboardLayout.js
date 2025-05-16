@@ -5,6 +5,7 @@ import { Outlet } from "react-router-dom";
 import styled from "styled-components";
 import DashboardHeader from "./DashboardHeader";
 import Sidebar from "./Sidebar";
+import { userRole } from "../../utils/constants";
 const DashboardStyles = styled.div`
   max-width: 1600px;
   margin: 0 auto;
@@ -39,7 +40,13 @@ const DashboardStyles = styled.div`
 `;
 const DashboardLayout = () => {
   const { userInfo } = useAuth();
-  if (!userInfo) return <PageNotFound></PageNotFound>;
+
+  if (
+    !userInfo ||
+    (userInfo.role !== userRole.ADMIN && userInfo.role !== userRole.MOD)
+  )
+    return <PageNotFound></PageNotFound>;
+
   return (
     <DashboardStyles>
       <DashboardHeader></DashboardHeader>

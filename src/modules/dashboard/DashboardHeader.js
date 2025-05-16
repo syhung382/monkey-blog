@@ -2,6 +2,7 @@ import { Button } from "../../components/button";
 import React from "react";
 import { NavLink } from "react-router-dom";
 import styled from "styled-components";
+import { useAuth } from "../../contexts/auth-context";
 const DashboardHeaderStyles = styled.div`
   background-color: white;
   padding: 20px;
@@ -37,6 +38,8 @@ const DashboardHeaderStyles = styled.div`
 `;
 
 const DashboardHeader = () => {
+  const { userInfo } = useAuth();
+
   return (
     <DashboardHeaderStyles>
       <NavLink to="/" className="logo">

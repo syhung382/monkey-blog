@@ -30,7 +30,7 @@ const CategoryManage = () => {
   const [lastDoc, setLastDoc] = useState();
   const [total, setTotal] = useState(0);
 
-  let qLimit = qLimit;
+  let qLimit = queryLimit.NORMAL;
 
   useEffect(() => {
     async function fetchData() {
