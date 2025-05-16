@@ -28,11 +28,11 @@ const PostCategory = ({
   children,
   type = "primary",
   className = "",
-  directTo = "#",
+  to = "#",
 }) => {
   return (
     <PostCategoryStyle type={type} className={`post-category ${className}`}>
-      <NavLink to={directTo}>{children}</NavLink>
+      <NavLink to={to}>{children}</NavLink>
     </PostCategoryStyle>
   );
 };

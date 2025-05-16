@@ -32,7 +32,7 @@ export const categoryStatus = {
 };
 
 export const queryLimit = {
-  SMALL: 5,
+  SMALL: 4,
   NORMAL: 10,
   MEDIUM: 25,
   LARGE: 50,

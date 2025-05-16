@@ -7,8 +7,7 @@ const InputStyles = styled.div`
   width: 100%;
   textarea {
     width: 100%;
-    padding: ${(props) =>
-      props.hasIcon ? "15px 60px 15px 25px" : "15px 25px"};
+    padding: "15px 25px";
     background-color: transparent;
     border: 1px solid ${(props) => props.theme.grayf1};
     border-radius: 8px;
@@ -22,13 +21,6 @@ const InputStyles = styled.div`
   }
   textarea::-moz-input-placeholder {
     color: #84878b;
-  }
-  .textarea-icon {
-    position: absolute;
-    right: 20px;
-    top: 50%;
-    transform: translateY(-50%);
-    cursor: pointer;
   }
 `;
 const Textarea = ({
@@ -44,7 +36,7 @@ const Textarea = ({
     defaultValue: "",
   });
   return (
-    <InputStyles hasIcon={children ? true : false}>
+    <InputStyles>
       <textarea id={name} type={type} {...field} {...props} />
       {children ? <div className="input-icon">{children}</div> : null}
     </InputStyles>

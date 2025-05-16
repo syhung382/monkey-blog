@@ -4,8 +4,6 @@ import Layout from "../components/layout/Layout";
 import PostImage from "../modules/post/PostImage";
 import PostCategory from "../modules/post/PostCategory";
 import PostMeta from "../modules/post/PostMeta";
-import Heading from "../components/layout/Heading";
-import PostItem from "../modules/post/PostItem";
 import { useParams } from "react-router-dom";
 import {
   collection,
@@ -18,6 +16,7 @@ import {
 import { db } from "../firebase-app/firebase-config";
 import parse from "html-react-parser";
 import NotFoundPage from "./NotFoundPage";
+import PostRelated from "../modules/post/PostRelated";
 
 const PostDetailsPageStyles = styled.div`
   padding-bottom: 100px;
@@ -146,6 +145,11 @@ const PostDetailsPage = () => {
     fetchData();
   }, [slug]);
 
+  useEffect(() => {
+    // window.scroll(0, 0);
+    document.body.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [slug]);
+
   if (!slug || !postInfo.title) return <NotFoundPage></NotFoundPage>;
 
   return (
@@ -158,13 +162,15 @@ const PostDetailsPage = () => {
               className="post-feature"
             ></PostImage>
             <div className="post-info">
-              <PostCategory className="mb-6">{category?.name}</PostCategory>
+              <PostCategory className="mb-6" to={`/c/${category?.slug}`}>
+                {category?.name}
+              </PostCategory>
               <h1 className="post-heading">{postInfo?.title}</h1>
               <PostMeta
                 date={new Date(
                   postInfo?.createdAt?.seconds * 1000
                 ).toLocaleDateString("vi-VI")}
-                author={user?.username}
+                author={user?.fullname}
                 directTo={`/u/${user.id}`}
               ></PostMeta>
             </div>
@@ -186,15 +192,7 @@ const PostDetailsPage = () => {
               </div>
             </div>
           </div>
-          <div className="post-related">
-            <Heading>Bài viết liên quan</Heading>
-            <div className="grid-layout grid-layout--primary">
-              <PostItem></PostItem>
-              <PostItem></PostItem>
-              <PostItem></PostItem>
-              <PostItem></PostItem>
-            </div>
-          </div>
+          <PostRelated categoryId={postInfo?.categoryId}></PostRelated>
         </div>
       </Layout>
     </PostDetailsPageStyles>

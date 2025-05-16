@@ -20,15 +20,10 @@ const PostTitleStyle = styled.h3`
     `};
 `;
 
-const PostTitle = ({
-  children,
-  className = "",
-  size = "normal",
-  directTo = "#",
-}) => {
+const PostTitle = ({ children, className = "", size = "normal", to = "#" }) => {
   return (
     <PostTitleStyle size={size} className={`post-title ${className}`}>
-      <NavLink to={directTo}>{children}</NavLink>
+      <NavLink to={to}>{children}</NavLink>
     </PostTitleStyle>
   );
 };
