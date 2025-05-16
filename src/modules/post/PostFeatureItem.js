@@ -84,17 +84,20 @@ const PostFeatureItem = ({ data }) => {
     : new Date();
   const formatDate = new Date(date).toLocaleDateString("vi-VI");
 
+  console.log(data);
+
   return (
     <PostFeatureItemStyles>
       <PostImage
         url="https://images.unsplash.com/photo-1614624532983-4ce03382d63d?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2662&q=80"
         alt="unsplash"
+        to={`/${data?.slug}`}
       ></PostImage>
       <div className="post-overlay"></div>
       <div className="post-content">
         <div className="post-top">
           {category?.name && (
-            <PostCategory directTo={category.slug}>
+            <PostCategory to={`/c/${category.slug}`}>
               {category.name}
             </PostCategory>
           )}
@@ -104,7 +107,7 @@ const PostFeatureItem = ({ data }) => {
             date={formatDate || ""}
           ></PostMeta>
         </div>
-        <PostTitle size="large" directTo={data.slug}>
+        <PostTitle size="large" to={`/${data.slug}`}>
           {data.title}
         </PostTitle>
       </div>
